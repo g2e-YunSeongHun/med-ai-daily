@@ -1,0 +1,163 @@
+# Search Rules
+
+기사 수집은 `검색 회수율 확보 -> 원문 검증 -> 정리 고정`의 3단 구조로 고정한다. 목표는 단순히 많이 모으는 것이 아니라, 의료 AI·응급의료 AI·응급실 AI·중환자실 AI 관련 국내 기사 누락을 줄이면서도 매일 비슷한 품질과 구조의 기사 묶음을 만드는 것이다.
+
+## 기간 고정
+
+- 수집 대상: KST 기준 **어제 하루** (`YYYY-MM-DD` 1일)
+- 주말·공휴일이라 기사가 적으면 그대로 적게 싣는다. 기간을 늘리지 않는다.
+- 예시: 오늘이 `2026-09-02`이면 대상은 `2026-09-01`
+
+## 섹션 분량 기준
+
+- 하루 단위이므로 건수 목표는 두지 않는다. 국내 0~5건, 해외 0~5건 정도가 보통이다.
+- 품질 기준을 넘는 기사는 모두 싣는다. 상한을 맞추려고 좋은 기사를 버리지 않는다.
+- 반대로 기준 미달 기사를 건수 채우기용으로 넣지 않는다. 0건인 날도 정상이다.
+
+## 수집 단계
+
+### 1. Scan
+
+- 먼저 아래 `검색 쿼리 구성`의 축별 쿼리에 대상 날짜를 붙여 당일 쿼리 세트를 만든다.
+- 넓은 검색으로 후보를 수집한 뒤, 국내는 `필수 도메인 순회`, 해외는 `우선 기사 도메인 순회`를 추가 수행한다.
+- 뉴스 전용 검색 결과나 포털 뉴스 결과는 후보 시드로만 사용한다. 최종 포함 여부는 반드시 원문 URL을 열어 판단한다.
+- 국내 기사 `0건`을 선언하기 전에 `국내 필수 도메인` 전체에 대한 site-pass와 `의료 AI/응급의료 AI/응급실 AI/중환자실 AI/의료기기·의료영상 AI/119·구급/문서화` 축 보조 검색을 수행한다.
+
+### 2. Verify
+
+- 후보 URL은 `python scripts/extract.py`로 본문과 발행일을 검증한다.
+- 발행일이 범위를 벗어나면 제외한다.
+- 원문 검증이 안 되는 재배포 단문은 제외한다.
+- 제목보다 본문이 더 중요하다. 제목이 질환명/제품명 중심이어도 본문에서 응급실, 응급치료, 구급 워크플로, 중환자실/ICU 맥락이 확인되면 포함 후보로 유지한다.
+
+### 3. 정리
+
+- 중복 URL과 사실상 동일한 재보도는 1건만 남긴다.
+- 누적 `data/articles.json`에 이미 포함된 같은 제품/사업 발표는 재보도만으로 다시 올리지 않는다. URL이 달라도 같은 발표면 제외한다.
+- 아래 `동률 해소 규칙`과 `정렬 규칙`에 따라 순서를 고정한다.
+- 고정이 끝난 목록만 SKILL.md Step 6의 분석 대상으로 넘긴다.
+
+## 직접 관련성 기준
+
+아래 키워드 중 하나 이상이 기사 제목 또는 본문 핵심에 직접 등장해야 한다.
+
+- 국문: `의료 AI`, `의료 인공지능`, `의료기기 AI`, `의료기기`, `의료 영상 AI`, `의료 영상`, `의료영상`, `진단 AI`, `판독 AI`, `중환자실`, `중환자의료`, `응급`, `응급실`, `응급의료`, `구급`, `119`, `중증`, `트리아지`
+- 영문: `medical AI`, `healthcare AI`, `medical device AI`, `medical imaging AI`, `diagnostic AI`, `radiology AI`, `ICU`, `critical care`, `intensive care`, `emergency`, `emergency department`, `ED`, `acute care`, `triage`, `ambulance`, `EMS`, `911`, `prehospital`, `trauma`
+
+보완 규칙:
+
+- `소방`은 단독 직접 관련성 키워드로 보지 않는다. `119`, `구급`, `신고접수`, `출동지령`, `상황관제`, `이송`, `응급의료` 같은 워크플로가 함께 확인될 때만 포함 후보로 유지한다.
+- `뇌졸중 AI`, `뇌출혈 AI`, `CT/MR 판독 AI`, `POCUS AI`, `심전도 AI`처럼 질환/제품 축으로 노출된 기사라도 본문에서 응급 치료 판단, 응급 환자 대응, 응급실/구급 워크플로가 확인되면 포함 후보로 유지한다.
+- `의료 AI`, `의료기기 AI`, `의료 영상 AI`, `영상 AI`도 의료기관 진료, 의료기기·의료영상, 중환자의료, 응급실/응급의료 중 하나와 연결되면 포함 후보로 유지한다.
+- `트리아지`나 급성 악화 조기 포착 기사는 응급실, 응급의료, 중환자실/ICU 문맥이 본문에서 확인될 때만 포함 후보로 유지한다.
+
+## AI 관련성 기준
+
+아래 키워드 중 하나 이상이 명시돼야 한다.
+
+- 국문: `AI`, `인공지능`, `생성형 AI`, `의료 AI`, `대형언어모델`, `음성인식`, `자동화`
+- 영문: `AI`, `artificial intelligence`, `LLM`, `foundation model`, `machine learning`, `automation`, `ambient`, `scribe`
+
+## 검색 쿼리 구성
+
+국내 검색은 6개 묶음으로 수행한다.
+
+- 의료 AI/의료기기/의료영상: `의료 AI`, `의료 인공지능`, `의료기기 AI`, `의료 영상 AI`, `진단 AI`, `판독 AI`
+- 응급의료/응급실 진료 AI: `응급의료 AI`, `응급실 AI`, `응급환자 AI 트리아지`, `중증환자 AI 분류`, `응급 CT AI 판독`, `뇌졸중 AI 응급`, `심전도 AI 구급`, `POCUS AI 응급`
+- 중환자실/중환자의료 AI: `중환자실 AI`, `중환자의료 AI`, `중환자실 AI 경보`
+- 응급/중환자 급성 악화 AI: `응급실 급성 악화 AI`, `중환자실 임상 악화 AI`, `중증화 AI 응급`, `ICU early warning AI`
+- 119/구급 현장 AI: `119 AI 신고접수`, `119 AI 출동지령`, `119 AI 상황관제`, `구급대 AI`, `소방청 AI 119`, `소방청 AI 구급`
+- 병원 수용/이송 지연 AI: `응급실 뺑뺑이 AI`, `응급실 AI 병원 동시연락`, `응급환자 병원 수용 AI`, `응급환자 이송 AI 병원`
+- 심정지/구급품질 AI: `급성심장정지 구급 AI`, `급성심장정지 구급품질 AI`, `질병관리청 소방청 AI 급성심장정지`
+- 응급실 문서화/업무부담 AI: `응급실 AI 문서화`, `응급실 AI 진료기록`, `응급실 음성인식 AI`, `응급실 생성형 AI`, `응급실 실사용 AI`
+
+국내 보조 검색에서 `의료 AI` 단독 검색도 허용하되, 결과 검토 시 의료기관 진료, 의료기기·의료영상, 중환자실, 응급의료 중 하나와 연결되는 기사만 유지한다.
+
+- `의료 AI 응급실`
+- `의료 AI 응급환자`
+- `의료 AI 중증환자`
+
+아래 쿼리는 기본 국내 수집에서 후순위로 둔다. 의료기관 진료, 의료기기·의료영상, 중환자실, 응급의료 맥락이 확인되면 포함할 수 있다.
+
+- `응급실 AI 병상 배정`, `응급실 AI 환자 흐름`, `응급의료센터 AI 운영 시스템`, `응급 협진 AI 전원 조정`
+- `소방 AI`, `AI 로봇`, `AI 기술위원회`처럼 119/구급/응급의료 워크플로가 제목 또는 본문 핵심에 없는 일반 소방·재난 기술 기사
+
+해외 검색은 5개 묶음으로 수행한다.
+
+- EMS/911: `EMS AI documentation ePCR`, `911 AI dispatch emergency medical services`, `ambulance AI routing dispatch`, `EMS AI protocol platform`
+- 문서화/업무부담: `emergency department ambient AI scribe`, `AI documentation emergency department`
+- 도입/상용화: `emergency care AI deployment news`, `emergency care AI partnership integration`, `AI clinical workflow platform EMS`
+- 임상 보조/트리아지: `emergency department AI triage`, `emergency department AI clinical decision support deployment`, `AI fracture triage emergency department clearance`, `stroke AI emergency workflow`, `sepsis AI emergency department`, `POCUS AI emergency`
+- 응급실/ICU 급성 악화: `ICU early warning AI deployment`, `critical care clinical deterioration AI deployment`, `emergency department early warning AI deployment`
+
+`patient flow`, `bed management`, `hospital command center`는 단독 운영 자동화만이면 후순위지만, 의료 AI·응급실·ICU의 임상 의사결정 또는 진료지원과 연결되면 포함할 수 있다.
+
+## 도메인 우선순위
+
+### 국내 필수 도메인
+
+- `medicaltimes.com`
+- `medigatenews.com`
+- `dailymedi.com`
+- `rapportian.com`
+- `docdocdoc.co.kr`
+- `mdtoday.co.kr`
+- `hitnews.co.kr`
+- `pharm.edaily.co.kr`
+- `mohw.go.kr`
+- `yna.co.kr`
+- `newsis.com`
+- `yeongnam.com`
+
+### 해외 기사 우선 도메인
+
+- `jems.com`
+- `firehouse.com`
+- `emsworld.com`
+- `healthcareitnews.com`
+- `beckershospitalreview.com`
+- `fiercehealthcare.com`
+- `mobihealthnews.com`
+- `healthitanalytics.com`
+- `ems1.com`
+- `globenewswire.com`
+- `businesswire.com`
+- `prnewswire.com`
+
+## 기사 유형 우선순위
+
+동점이면 아래 순서를 우선한다.
+
+1. 실제 도입/운영 사례
+2. 병원, 소방, 공공기관 발표
+3. 제품 통합, 수주, 파트너십, 상용화 기사
+4. 정책 또는 공공사업
+5. 응급의료 현장 영향이 큰 기술·제품 기사
+
+## 제외 규칙
+
+- 의료기관 진료, 의료기기·의료영상, 중환자실, 응급의료와 연결되지 않는 일반 웰니스/보험/마케팅 AI 기사
+- 119/구급/응급의료 워크플로가 확인되지 않는 일반 소방 AI, 로봇, 위원회, 조직 신설 기사
+- 의료 AI 직접성이 약한 병상 배정, 환자 흐름, 전원 조정, 병원 운영 자동화 기사
+- 단, 응급실/ICU 직접 문맥과 트리아지 또는 급성 악화 조기 포착이 본문 핵심이면 포함 후보로 둘 수 있다.
+- 해외 기본 모드에서 `patient flow`, `bed management`, `hospital command center`만 핵심인 병원 운영 기사
+- 기사 원문 확인이 어려운 단문 재배포 기사
+- 날짜가 범위를 벗어난 기사
+- 같은 내용의 중복 기사
+- 블로그, 커뮤니티, 영상 플랫폼, 개인 브런치형 글
+
+## 동률 해소 규칙
+
+여러 기사가 비슷하면 아래 순서로 선택한다.
+
+1. 의료 AI 또는 응급/중환자의료 AI 직접성
+2. 실제 도입 또는 운영 여부
+3. 신규성: 누적 데이터에 이미 다룬 같은 제품/사업 발표가 아닌지
+4. 기관 신뢰도
+5. 날짜 최신성
+6. 제목 명확성
+
+## 정렬 규칙
+
+- 섹션 내부 정렬: `score desc -> date desc -> source asc -> title asc`
+- 최종 JSON은 항상 이 정렬을 유지한다.
