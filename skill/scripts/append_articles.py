@@ -7,7 +7,7 @@ Usage:
 <new_articles_json>: 기사 객체 배열. 각 객체는 최소 "섹션"("국내"|"해외"), "제목", "링크", "날짜"를 가진다.
 <articles_json_path>: 누적 파일. 없으면 빈 배열로 시작한다.
 
-URL(쿼리스트링·fragment·trailing slash 제거, 소문자)이 같은 기사는 건너뛴다.
+URL(fragment·trailing slash 제거, 소문자)이 같은 기사는 건너뛴다.
 추가된 기사에는 "수집일"(KST 오늘)을 찍는다. build_site.py가 이 값으로 "신규" 섹션을 만든다.
 stdout 마지막 줄에 "ADDED:<n> SKIPPED:<m> TOTAL:<t>"를 출력한다.
 """
@@ -26,7 +26,8 @@ KST = timezone(timedelta(hours=9))
 def normalize_url(url: str) -> str:
     parts = urlsplit(url.strip())
     path = parts.path.rstrip("/")
-    return urlunsplit((parts.scheme.lower(), parts.netloc.lower(), path, "", ""))
+    # 국내 언론사는 기사 ID를 쿼리스트링(?idxno=...)에 두므로 쿼리를 지우면 안 된다.
+    return urlunsplit((parts.scheme.lower(), parts.netloc.lower(), path, parts.query, ""))
 
 
 def _load(path: Path) -> list[dict]:
