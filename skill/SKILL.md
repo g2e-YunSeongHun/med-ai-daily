@@ -27,7 +27,7 @@ skill/
   references/search-rules.md  검색 축·도메인·포함/제외 규칙
   scripts/extract.py          URL → 본문·발행일·og:image 추출 (trafilatura → Playwright 폴백)
   scripts/append_articles.py  새 기사를 누적 파일에 URL 중복 대조 후 병합, 수집일 기록
-  scripts/build_site.py       최근 30일 기사 → docs/index.html (신규 카드 + 이전 접힌 리스트)
+  scripts/build_site.py       최근 30일 기사 → docs/index.html (날짜별 뉴스 피드)
   templates/dashboard.html    피드 템플릿 (필터·검색 JS 포함)
 data/articles.json            누적 기사 (전체 보관)
 docs/index.html               피드 (GitHub Pages)
