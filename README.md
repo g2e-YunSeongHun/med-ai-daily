@@ -1,6 +1,6 @@
 # med-ai-daily
 
-의료 AI · 응급의료 AI 일간 뉴스 피드. 매일 오전 9시(KST) 클라우드 루틴이 전날 기사를 수집해 누적하고 피드 페이지를 재생성한다.
+의료 AI · 응급의료 AI 일간 뉴스 피드. 매일 새벽 2시(KST) 클라우드 루틴이 전날 기사를 수집해 누적하고 피드 페이지를 재생성한다.
 
 - 피드: https://g2e-yunseonghun.github.io/med-ai-daily/
 - 수집·작성 절차: `skill/SKILL.md`
