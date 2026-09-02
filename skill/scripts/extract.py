@@ -6,7 +6,7 @@ Usage:
     echo -e "https://example.com/article1\nhttps://example.com/article2" | python extract.py
 
 Output (stdout):
-    JSON 배열 — 각 항목에 url, text, date, title, success 포함
+    JSON 배열 — 각 항목에 url, text, date, title, image(og:image), success 포함
 
 폴백 체인: trafilatura → Playwright (headless browser)
 """
@@ -72,6 +72,7 @@ def _extract_from_html(html: str, result: dict) -> dict:
     if metadata:
         result["title"] = metadata.title or ""
         result["date"] = metadata.date
+        result["image"] = metadata.image or ""
 
     # text 없어도 date만 있으면 부분 성공
     if not text and metadata and metadata.date:
@@ -81,7 +82,7 @@ def _extract_from_html(html: str, result: dict) -> dict:
 
 
 def extract_article(url: str) -> dict:
-    result = {"url": url, "text": "", "date": None, "title": "", "success": False}
+    result = {"url": url, "text": "", "date": None, "title": "", "image": "", "success": False}
     try:
         # 1차: trafilatura 기본 fetch
         downloaded = trafilatura.fetch_url(url)

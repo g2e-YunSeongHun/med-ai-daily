@@ -8,6 +8,7 @@ Usage:
 <articles_json_path>: 누적 파일. 없으면 빈 배열로 시작한다.
 
 URL(쿼리스트링·fragment·trailing slash 제거, 소문자)이 같은 기사는 건너뛴다.
+추가된 기사에는 "수집일"(KST 오늘)을 찍는다. build_site.py가 이 값으로 "신규" 섹션을 만든다.
 stdout 마지막 줄에 "ADDED:<n> SKIPPED:<m> TOTAL:<t>"를 출력한다.
 """
 
@@ -15,8 +16,11 @@ from __future__ import annotations
 
 import json
 import sys
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from urllib.parse import urlsplit, urlunsplit
+
+KST = timezone(timedelta(hours=9))
 
 
 def normalize_url(url: str) -> str:
@@ -44,6 +48,7 @@ def main() -> None:
     new_articles = _load(new_path)
     existing = _load(store_path)
     seen = {normalize_url(a.get("링크", "")) for a in existing if a.get("링크")}
+    today = datetime.now(KST).date().isoformat()
 
     added = skipped = 0
     for article in new_articles:
@@ -55,6 +60,7 @@ def main() -> None:
         if article.get("섹션") not in ("국내", "해외"):
             raise SystemExit(f"섹션 값이 잘못됨: {article.get('섹션')!r} ({link})")
         article.pop("원문", None)
+        article["수집일"] = today
         existing.append(article)
         seen.add(key)
         added += 1

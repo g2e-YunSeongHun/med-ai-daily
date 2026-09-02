@@ -1,24 +1,23 @@
 ---
 name: med-ai-daily
-description: '의료·응급의료 AI 일간 뉴스 브리핑. 어제(KST) 발행된 국내/해외 기사와 논문을 검색해 원문·발행일을 검증하고, 누적 데이터에 병합한 뒤 Claude가 요약과 최근 7일 인사이트를 작성해 docs/index.html을 재생성한다.'
+description: '의료·응급의료 AI 일간 뉴스 피드. 어제(KST) 발행된 국내/해외 기사를 검색해 원문·발행일을 검증하고, 누적 데이터에 병합한 뒤 기사별 요약을 작성해 docs/index.html 피드를 재생성한다.'
 ---
 
-# 의료·응급의료 AI 일간 뉴스 브리핑
+# 의료·응급의료 AI 일간 뉴스 피드
 
-매일 1회 실행된다. 어제 하루 발행된 의료 AI · 응급의료 AI 기사를 수집해 누적하고, 대시보드 HTML을 다시 만든다.
+매일 1회 실행된다. 어제 하루 발행된 의료 AI · 응급의료 AI **기사**를 수집해 누적하고, 피드형 HTML을 다시 만든다. 학술 논문은 수집하지 않는다.
 
 **IMPORTANT: 모든 출력은 한국어로 작성한다.**
 
 ## Quick Start
 
 1. 대상 날짜 = KST 기준 어제.
-2. 국내 기사, 해외 기사, 학술 논문을 검색해 후보 URL을 모은다.
+2. 국내 기사, 해외 기사를 검색해 후보 URL을 모은다.
 3. `scripts/extract.py`로 원문과 발행일을 검증한다.
 4. 누적 `data/articles.json`과 대조해 중복·재보도를 제거한다.
 5. 새 기사마다 요약과 세부분석을 작성한다.
 6. `scripts/append_articles.py`로 누적 파일에 병합한다.
-7. 최근 7일 기사를 기준으로 `data/summary.json`을 다시 작성한다.
-8. `scripts/build_site.py`로 `docs/index.html`을 재생성한다.
+7. `scripts/build_site.py`로 `docs/index.html`을 재생성한다.
 
 ## 저장소 구조
 
@@ -26,14 +25,12 @@ description: '의료·응급의료 AI 일간 뉴스 브리핑. 어제(KST) 발�
 skill/
   SKILL.md                    이 문서
   references/search-rules.md  검색 축·도메인·포함/제외 규칙
-  scripts/extract.py          URL → 본문·발행일 추출 (trafilatura → Playwright 폴백)
-  scripts/append_articles.py  새 기사를 누적 파일에 URL 중복 대조 후 병합
-  scripts/build_site.py       최근 30일 기사 + 요약 → docs/index.html
-  scripts/render_dashboard.py JSON → HTML (build_site.py가 호출)
-  templates/dashboard.html    대시보드 템플릿
+  scripts/extract.py          URL → 본문·발행일·og:image 추출 (trafilatura → Playwright 폴백)
+  scripts/append_articles.py  새 기사를 누적 파일에 URL 중복 대조 후 병합, 수집일 기록
+  scripts/build_site.py       최근 30일 기사 → docs/index.html (신규 카드 + 이전 접힌 리스트)
+  templates/dashboard.html    피드 템플릿 (필터·검색 JS 포함)
 data/articles.json            누적 기사 (전체 보관)
-data/summary.json             최근 7일 요약
-docs/index.html               대시보드 (GitHub Pages)
+docs/index.html               피드 (GitHub Pages)
 _work/                        작업 파일. git에 올리지 않는다
 ```
 
@@ -60,22 +57,16 @@ TARGET=$(TZ=Asia/Seoul date -d yesterday +%F)
 
 ### Step 2. 검색
 
-`references/search-rules.md`의 검색 축과 도메인 우선순위를 따른다. 세 카테고리를 모두 수행한다.
+`references/search-rules.md`의 검색 축과 도메인 우선순위를 따른다. 두 카테고리를 모두 수행한다.
 
 - **국내 기사**: 8개 축. `TARGET` 날짜와 함께 검색하고, `0건`으로 결론 내기 전에 국내 필수 도메인 site-pass를 반드시 수행한다.
-- **해외 기사**: 5개 축.
-- **학술 논문**: 아래 쿼리 사용. 결과는 해외 섹션에 포함한다.
-  - `emergency triage AI machine learning site:pubmed.ncbi.nlm.nih.gov`
-  - `emergency medicine artificial intelligence peer-reviewed`
-  - `emergency department AI clinical trial`
-  - `prehospital emergency AI prediction model`
-  - 우선 도메인: `pubmed.ncbi.nlm.nih.gov`, `pmc.ncbi.nlm.nih.gov`, `jmir.org`, `annemergmed.com`, `ai.nejm.org`, `nature.com`
+- **해외 기사**: 5개 축. 뉴스 매체·업계 매체 기사만. 학술 논문(PubMed, 저널 사이트)은 제외한다.
 
 공통 규칙:
 
 - 노이즈 도메인 제외: `youtube.com`, `blog.naver.com`, `tistory.com`, `brunch.co.kr`, `medium.com`, `velog.io`, `reddit.com`
 - 검색 결과와 포털 뉴스는 후보 시드일 뿐이다. 포함 여부는 원문 URL을 열어 판단한다.
-- `Agent` 툴이 있으면 세 카테고리를 병렬로 돌려도 된다. 없으면 순차 수행한다.
+- `Agent` 툴이 있으면 두 카테고리를 병렬로 돌려도 된다. 없으면 순차 수행한다.
 
 ### Step 3. 원문·발행일 검증
 
@@ -85,7 +76,7 @@ TARGET=$(TZ=Asia/Seoul date -d yesterday +%F)
 echo '["https://url1", "https://url2"]' | python skill/scripts/extract.py > _work/extracted.json
 ```
 
-반환: `[{"url","text","date","title","success"}]`
+반환: `[{"url","text","date","title","image","success"}]` (`image`는 og:image URL, 없으면 빈 문자열)
 
 판정 규칙:
 
@@ -119,6 +110,7 @@ echo '["https://url1", "https://url2"]' | python skill/scripts/extract.py > _wor
   "구분": "연구|도입|정책|트렌드",
   "날짜": "YYYY-MM-DD",
   "링크": "원문 URL",
+  "이미지": "extract.py가 돌려준 image URL. 없으면 생략",
   "기사요약": "3~5문장. 누가, 무엇을, 왜, 어떻게.",
   "세부분석": {
     "관련 기업/기관": "...",
@@ -128,7 +120,7 @@ echo '["https://url1", "https://url2"]' | python skill/scripts/extract.py > _wor
 }
 ```
 
-- `섹션`은 `국내` 또는 `해외`. 학술 논문은 `해외`.
+- `섹션`은 `국내` 또는 `해외`.
 - **`원문`에 있는 내용만 근거로 삼는다. 추측하지 않는다.** 원문에 없는 수치·기관명·날짜를 지어내지 않는다.
 - 원문이 비어 있으면 `기사요약`은 `원문 미확보`, `세부분석` 값은 빈 문자열.
 - 해외 기사 제목·요약은 의미 보존을 우선해 한국어로 쓴다.
@@ -139,32 +131,18 @@ echo '["https://url1", "https://url2"]' | python skill/scripts/extract.py > _wor
 python skill/scripts/append_articles.py _work/new_articles.json data/articles.json
 ```
 
-마지막 줄 `ADDED:<n> SKIPPED:<m> TOTAL:<t>`를 확인한다. `ADDED:0`이면 Step 8로 건너뛴다.
+마지막 줄 `ADDED:<n> SKIPPED:<m> TOTAL:<t>`를 확인한다. `ADDED:0`이면 Step 7로 건너뛴다.
 
-### Step 6. 최근 7일 요약 재작성
-
-`data/articles.json`에서 `날짜 >= TARGET - 6일`인 기사 전체를 읽고 `data/summary.json`을 **덮어쓴다**.
-
-```json
-{
-  "핵심동향": ["3~5개 항목"],
-  "주목할기관/기업": ["2~4개 항목"],
-  "시사점": "2~4문장"
-}
-```
-
-- 여러 기사에 공통으로 나타나는 흐름을 `핵심동향`으로 묶는다. 기사 1건짜리 내용을 동향으로 일반화하지 않는다.
-- 최근 7일 기사가 0건이면 세 필드를 비운다.
-
-### Step 7. 대시보드 재생성
+### Step 6. 피드 재생성
 
 ```bash
-python skill/scripts/build_site.py data/articles.json data/summary.json docs/index.html
+python skill/scripts/build_site.py data/articles.json docs/index.html
 ```
 
-최근 30일 기사만 렌더링된다. 그 이전 기사는 `data/articles.json`에만 남는다.
+- 최근 30일 기사만 렌더링된다. 그 이전 기사는 `data/articles.json`에만 남는다.
+- 가장 최근 `수집일`의 기사가 상단 "신규" 카드로, 나머지는 접힌 리스트로 들어간다.
 
-### Step 8. 커밋
+### Step 7. 커밋
 
 - `ADDED`가 1 이상이면 `data/`와 `docs/`를 커밋한다. `_work/`는 커밋하지 않는다.
 - 커밋 메시지: `brief: {TARGET} 국내 {n}건 해외 {m}건`
