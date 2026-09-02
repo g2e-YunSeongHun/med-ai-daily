@@ -4,87 +4,69 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>의료·응급의료 AI 데일리 — 2026년 9월 2일 (수)</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+KR:wght@600;700&family=Noto+Sans+KR:wght@400;500;700&display=swap" />
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700;900&display=swap" />
   <style>
     :root {
-      --bg: #f7f9fb; --surface: #ffffff; --surface-alt: #f1f5f9; --border: #dbe2ea;
-      --ink: #0f1f3d; --text: #334155; --muted: #5b6b82; --faint: #94a3b8;
-      --accent: #1d4ed8; --accent-dark: #1e3a8a;
+      --bg: #ffffff; --bg-alt: #f6f7f9; --border: #e5e8ec; --border-strong: #111827;
+      --ink: #111827; --text: #374151; --muted: #6b7280; --faint: #9ca3af;
+      --accent: #1d4ed8; --new: #dc2626;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--ink); line-height: 1.6; }
-    a { color: var(--accent); text-decoration: none; } a:hover { color: var(--accent-dark); text-decoration: underline; }
-    .serif { font-family: 'Noto Serif KR', 'Nanum Myeongjo', serif; }
-    .wrap { max-width: 880px; margin: 0 auto; padding: 0 20px 64px; }
+    body { font-family: 'Noto Sans KR', 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif; background: var(--bg); color: var(--ink); line-height: 1.55; }
+    a { color: inherit; text-decoration: none; } a:hover { text-decoration: underline; }
+    .wrap { max-width: 840px; margin: 0 auto; padding: 0 20px 64px; }
 
-    header { padding: 36px 0 18px; border-bottom: 1px solid var(--border); }
-    header .kicker { font-size: 12px; letter-spacing: .1em; color: var(--muted); }
-    header h1 { font-size: 30px; font-weight: 700; letter-spacing: -.02em; line-height: 1.2; margin-top: 6px; }
-    header .sub { font-size: 13px; color: var(--muted); margin-top: 6px; }
+    header { display: flex; justify-content: space-between; align-items: flex-end; padding: 26px 0 14px; border-bottom: 2px solid var(--border-strong); gap: 16px; flex-wrap: wrap; }
+    header h1 { font-size: 24px; font-weight: 900; letter-spacing: -.03em; line-height: 1.2; }
+    header h1 span { color: var(--accent); }
+    header .sub { font-size: 12.5px; color: var(--muted); }
 
-    .controls { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; padding: 16px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 2; }
-    .chip { padding: 5px 12px; border-radius: 999px; font-size: 12.5px; border: 1px solid #cbd5e1; color: var(--text); background: transparent; cursor: pointer; font-family: inherit; }
+    .controls { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; padding: 12px 0; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--bg); z-index: 2; }
+    .chip { padding: 5px 12px; border-radius: 999px; font-size: 12.5px; border: 1px solid var(--border); color: var(--text); background: transparent; cursor: pointer; font-family: inherit; }
     .chip.on { background: var(--ink); color: #fff; border-color: var(--ink); }
-    .sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
-    .search { margin-left: auto; display: flex; align-items: center; gap: 8px; background: var(--surface-alt); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; min-width: 220px; }
+    .sep { width: 1px; height: 16px; background: var(--border); margin: 0 4px; }
+    .search { margin-left: auto; display: flex; align-items: center; gap: 8px; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 6px; padding: 6px 10px; min-width: 220px; }
     .search input { border: 0; background: transparent; font: inherit; font-size: 13px; color: var(--ink); outline: none; width: 100%; }
     .search input::placeholder { color: var(--faint); }
 
-    section { margin-top: 28px; }
-    .sec-head { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 14px; }
-    .sec-head h2 { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
-    .badge { font-size: 12px; font-weight: 700; padding: 3px 10px; background: var(--accent); color: #fff; border-radius: 4px; }
-    .count { font-size: 13px; color: var(--muted); }
+    .day { display: flex; align-items: baseline; gap: 10px; padding: 26px 0 8px; }
+    .day h2 { font-size: 15px; font-weight: 700; letter-spacing: -.01em; }
+    .day .n { font-size: 12px; color: var(--muted); }
+    .day .line { flex: 1; height: 1px; background: var(--border); }
 
-    .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
-    .sec { font-weight: 700; color: var(--ink); } .sec.overseas { color: var(--muted); }
-    .tag { padding: 2px 8px; border-radius: 3px; font-weight: 500; }
+    .item { display: grid; grid-template-columns: minmax(0, 1fr) 168px; gap: 6px 22px; padding: 18px 0; border-bottom: 1px solid var(--border); }
+    .item.no-img { grid-template-columns: 1fr; }
+    .item .meta { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 12px; color: var(--muted); }
+    .item .meta .sec { font-weight: 700; color: var(--ink); }
+    .item .meta .sec.overseas { color: var(--accent); }
+    .item .meta .new { font-size: 10.5px; font-weight: 900; color: var(--new); letter-spacing: .04em; }
+    .tag { padding: 1px 7px; border-radius: 3px; font-size: 11.5px; font-weight: 500; }
     .tag-도입 { background: #dcfce7; color: #15803d; } .tag-연구 { background: #ede9fe; color: #6d28d9; }
     .tag-정책 { background: #fef3c7; color: #b45309; } .tag-트렌드 { background: #fce7f3; color: #be185d; }
-    .tag-field { background: var(--surface-alt); color: #475569; }
+    .item h3 { font-size: 18px; font-weight: 700; line-height: 1.4; letter-spacing: -.015em; }
+    .item h3 a:hover { color: var(--accent); }
+    .item p { font-size: 14px; color: var(--text); line-height: 1.65;
+              display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+    .item .foot { display: flex; gap: 8px; font-size: 12px; color: var(--muted); align-items: center; }
+    .item .foot .field { color: var(--faint); }
+    .item .thumb { width: 168px; height: 112px; object-fit: cover; border-radius: 4px; background: var(--bg-alt); grid-column: 2; grid-row: 1 / span 4; align-self: start; }
 
-    .card { background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 20px 22px; display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px 20px; margin-bottom: 12px; }
-    .card .body { display: flex; flex-direction: column; gap: 9px; min-width: 0; }
-    .card h3 { font-size: 19px; font-weight: 700; line-height: 1.4; letter-spacing: -.01em; }
-    .card p { font-size: 14.5px; color: var(--text); line-height: 1.7; }
-    .card .thumb { width: 150px; height: 100px; object-fit: cover; border-radius: 6px; background: var(--surface-alt); align-self: start; }
-    .card .thumb[hidden] { display: none; }
-    .card .links { display: flex; gap: 16px; font-size: 13px; align-items: center; }
-    .card .detail { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; font-size: 13px; background: var(--surface-alt); border-radius: 6px; padding: 10px 14px; }
-    .card .detail dt { font-weight: 600; white-space: nowrap; } .card .detail dd { color: var(--text); }
-
-    .archive-head { display: flex; align-items: baseline; gap: 12px; padding-bottom: 10px; border-bottom: 2px solid var(--ink); }
-    .archive-head h2 { font-size: 17px; font-weight: 700; }
-    .row { border-bottom: 1px solid var(--border); }
-    .row summary { list-style: none; cursor: pointer; display: grid; grid-template-columns: 64px 36px 60px minmax(0, 1fr) 130px; gap: 12px; align-items: center; padding: 12px 4px; }
-    .row summary::-webkit-details-marker { display: none; }
-    .row summary:hover { background: #fff; }
-    .row .d { font-size: 12px; color: var(--muted); white-space: nowrap; }
-    .row .s { font-size: 12px; font-weight: 700; } .row .s.overseas { color: var(--muted); }
-    .row .t { font-size: 11px; text-align: center; padding: 2px 6px; border-radius: 3px; }
-    .row .title { font-size: 14.5px; font-weight: 500; line-height: 1.4; color: var(--ink); }
-    .row .src { font-size: 12px; color: var(--muted); text-align: right; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .row .open { padding: 6px 4px 16px 112px; display: flex; flex-direction: column; gap: 8px; font-size: 14px; color: var(--text); }
-    .row .open .meta { font-size: 12px; }
-    .row[open] { background: #fff; }
-
-    .empty { text-align: center; color: var(--faint); padding: 32px 0; font-size: 14px; }
-    footer { margin-top: 40px; padding-top: 18px; border-top: 1px solid var(--border); font-size: 12px; color: var(--faint); text-align: center; }
+    .empty { text-align: center; color: var(--faint); padding: 40px 0; font-size: 14px; }
+    footer { margin-top: 36px; padding-top: 16px; border-top: 1px solid var(--border); font-size: 12px; color: var(--faint); text-align: center; }
     [hidden] { display: none !important; }
 
-    @media (max-width: 640px) {
-      .card { grid-template-columns: 1fr; } .card .thumb { width: 100%; height: 160px; }
-      .row summary { grid-template-columns: 56px minmax(0, 1fr); } .row .s, .row .t, .row .src { display: none; }
-      .row .open { padding-left: 4px; } .search { margin-left: 0; width: 100%; }
+    @media (max-width: 600px) {
+      .item { grid-template-columns: minmax(0, 1fr) 96px; }
+      .item .thumb { width: 96px; height: 72px; }
+      .item h3 { font-size: 16px; } .search { margin-left: 0; width: 100%; }
     }
   </style>
 </head>
 <body>
 <div class="wrap">
   <header>
-    <div class="kicker">공공의료AI사업부 · 매일 09:00 갱신</div>
-    <h1 class="serif">의료 · 응급의료 AI 데일리</h1>
-    <div class="sub">최근 30일 0건 · 국내 0 · 해외 0 · 최종 갱신 2026년 9월 2일 (수)</div>
+    <h1>의료<span>·</span>응급의료 AI 데일리</h1>
+    <div class="sub">최근 30일 0건 · 국내 0 · 해외 0 · 2026년 9월 2일 (수) 09:00 갱신</div>
   </header>
 
   <div class="controls" id="controls">
@@ -97,36 +79,24 @@
     <button class="chip" data-k="cat" data-v="정책">정책</button>
     <button class="chip" data-k="cat" data-v="트렌드">트렌드</button>
     <label class="search">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#5b6b82" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
       <input id="q" type="search" placeholder="제목, 기관, 키워드 검색" />
     </label>
   </div>
 
-  <section id="new">
-    <div class="sec-head">
-      <span class="badge">신규</span>
-      <h2 class="serif">새 기사 없음</h2>
-      <span class="count"></span>
-    </div>
-    <div class="empty">최근 수집에서 추가된 기사가 없습니다.</div>
-  </section>
-
-  <section id="archive">
-    <div class="archive-head">
-      <h2 class="serif">이전 기사</h2>
-      <span class="count">0건 · 제목을 누르면 요약이 펼쳐집니다</span>
-    </div>
-    <div class="empty">이전 기사가 없습니다.</div>
-  </section>
+  <main id="feed">
+    <div class="empty">아직 수집된 기사가 없습니다.</div>
+  </main>
 
   <div class="empty" id="nomatch" hidden>조건에 맞는 기사가 없습니다.</div>
-  <footer>의료·응급의료 AI 데일리 · 매일 09:00 KST 자동 수집 · 30일 이전 기사는 아카이브에 보관</footer>
+  <footer>의료·응급의료 AI 데일리 · 매일 09:00 KST 전날 기사 자동 수집 · 30일 이전 기사는 아카이브에 보관</footer>
 </div>
 
 <script>
 (function () {
   var state = { sec: '', cat: '', q: '' };
-  var items = Array.prototype.slice.call(document.querySelectorAll('[data-sec]'));
+  var items = Array.prototype.slice.call(document.querySelectorAll('.item'));
+  var days = Array.prototype.slice.call(document.querySelectorAll('.day'));
   var chips = document.querySelectorAll('#controls .chip');
   var input = document.getElementById('q');
 
@@ -138,9 +108,10 @@
         && (!q || (el.dataset.text || '').indexOf(q) !== -1);
       el.hidden = !ok; if (ok) visible++;
     });
-    ['new', 'archive'].forEach(function (id) {
-      var s = document.getElementById(id);
-      s.hidden = !s.querySelector('[data-sec]:not([hidden])');
+    days.forEach(function (d) {
+      var any = false, n = d.nextElementSibling;
+      while (n && !n.classList.contains('day')) { if (!n.hidden) any = true; n = n.nextElementSibling; }
+      d.hidden = !any;
     });
     document.getElementById('nomatch').hidden = visible > 0;
   }
@@ -154,7 +125,9 @@
   });
   input.addEventListener('input', function () { state.q = input.value; apply(); });
   document.querySelectorAll('img.thumb').forEach(function (img) {
-    img.addEventListener('error', function () { img.hidden = true; });
+    img.addEventListener('error', function () {
+      var it = img.closest('.item'); if (it) it.classList.add('no-img'); img.remove();
+    });
   });
 })();
 </script>

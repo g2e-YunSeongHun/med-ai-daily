@@ -140,7 +140,8 @@ python skill/scripts/build_site.py data/articles.json docs/index.html
 ```
 
 - 최근 30일 기사만 렌더링된다. 그 이전 기사는 `data/articles.json`에만 남는다.
-- 가장 최근 `수집일`의 기사가 상단 "신규" 카드로, 나머지는 접힌 리스트로 들어간다.
+- 날짜별 구분선 아래 기사 행이 이어지는 뉴스 피드 형태다. 가장 최근 `수집일`의 기사에는 NEW 표시가 붙는다.
+- `세부분석`은 화면에 표시하지 않지만 데이터에는 남기므로 계속 작성한다.
 
 ### Step 7. 커밋
 
