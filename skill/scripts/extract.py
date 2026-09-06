@@ -8,7 +8,7 @@ Usage:
 Output (stdout):
     JSON 배열 — 각 항목에 url, text, date, title, image(og:image), success 포함
 
-폴백 체인: trafilatura → Playwright (headless browser)
+폴백 체인: trafilatura → requests(프록시·사설 CA 반영) → Playwright (headless browser)
 """
 
 import io
@@ -18,6 +18,17 @@ import sys
 
 import trafilatura
 
+try:
+    import requests
+except ImportError:
+    requests = None
+
+_UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/131.0.0.0 Safari/537.36"
+)
+
 # Windows 콘솔 UTF-8 출력 보장
 sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8")
 sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
@@ -26,6 +37,26 @@ sys.stdin = io.TextIOWrapper(sys.stdin.buffer, encoding="utf-8")
 def _use_headless_browser() -> bool:
     """기본은 headless, 디버깅 시에만 headed 브라우저 허용."""
     return os.getenv("NEWS_SCRAP_HEADED", "").strip().lower() not in {"1", "true", "yes"}
+
+
+def _fetch_with_requests(url: str) -> str | None:
+    """trafilatura가 못 받아온 경우 requests로 재시도.
+
+    trafilatura는 자체 urllib3 풀을 쓰기 때문에 HTTPS_PROXY와 REQUESTS_CA_BUNDLE 같은
+    환경 변수를 반영하지 못한다. requests는 두 값을 모두 따르므로 프록시 뒤에서도 동작한다.
+    """
+    if requests is None:
+        return None
+    try:
+        resp = requests.get(url, headers={"User-Agent": _UA}, timeout=30)
+        if resp.status_code == 200:
+            if not resp.encoding or resp.encoding.lower() == "iso-8859-1":
+                resp.encoding = resp.apparent_encoding
+            if len(resp.text) > 500:
+                return resp.text
+    except Exception:
+        pass
+    return None
 
 
 def _fetch_with_playwright(url: str) -> str | None:
@@ -91,7 +122,14 @@ def extract_article(url: str) -> dict:
             if result["success"]:
                 return result
 
-        # 2차: Playwright headless 브라우저
+        # 2차: requests (프록시·사설 CA 환경 변수 반영)
+        downloaded = _fetch_with_requests(url)
+        if downloaded:
+            result = _extract_from_html(downloaded, result)
+            if result["success"]:
+                return result
+
+        # 3차: Playwright headless 브라우저
         downloaded = _fetch_with_playwright(url)
         if downloaded:
             result = _extract_from_html(downloaded, result)
